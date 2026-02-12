@@ -160,6 +160,79 @@
     .curso-column select {
       max-width: 100%;
     }
+    .calculadora-cambio {
+      width: 100%;
+      max-width: 480px;
+      background: linear-gradient(135deg, #e8f8f0 0%, #b3e8d5 100%);
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgb(0 0 0 / 0.15);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 2px solid #2ecc71;
+    }
+    .calculadora-cambio h3 {
+      margin-top: 0;
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: #2c3e50;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .calculadora-cambio label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    .calculadora-cambio input[type="number"] {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #2ecc71;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 1.2rem;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      font-weight: 600;
+    }
+    .calculadora-cambio input[type="number"]:focus {
+      border-color: #27ae60;
+      outline: none;
+      box-shadow: 0 0 8px #2ecc71aa;
+    }
+    .resultado-cambio {
+      background: white;
+      border-radius: 8px;
+      padding: 1rem;
+      border: 1px solid #ecf0f1;
+    }
+    .cambio-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid #ecf0f1;
+      color: #34495e;
+      font-weight: 600;
+    }
+    .cambio-item:last-child {
+      border-bottom: none;
+    }
+    .cambio-item.cambio-total {
+      background: #ecf0f1;
+      padding: 0.8rem;
+      border-radius: 6px;
+      margin-top: 0.5rem;
+      border: none;
+    }
+    .cambio-valor {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #2ecc71;
+    }
+    .cambio-valor-total {
+      font-size: 1.4rem;
+      color: #27ae60;
+    }
     .total {
       font-weight: 700;
       font-size: 1.5rem;
@@ -212,7 +285,7 @@
       margin-bottom: 0.8rem;
     }
     @media (max-width: 520px) {
-      #productos, .resumen, .historial {
+      #productos, .resumen, .historial, .calculadora-cambio {
         max-width: 100%;
         padding: 1rem;
       }
@@ -302,6 +375,26 @@
 
   <div class="total">Total: RD$<span id="total">0</span></div>
 
+  <div class="calculadora-cambio">
+    <h3>Calcular Cambio</h3>
+    <label for="montoPagado">¿Cuánto pagó el niño?</label>
+    <input type="number" id="montoPagado" placeholder="Ingresa el monto pagado" min="0" />
+    <div class="resultado-cambio">
+      <div class="cambio-item">
+        <span>A pagar:</span>
+        <span class="cambio-valor">RD$<span id="apagarCambio">0</span></span>
+      </div>
+      <div class="cambio-item">
+        <span>Pagó:</span>
+        <span class="cambio-valor">RD$<span id="pagoCambio">0</span></span>
+      </div>
+      <div class="cambio-item cambio-total">
+        <span>Cambio a devolver:</span>
+        <span class="cambio-valor cambio-valor-total">RD$<span id="cambio">0</span></span>
+      </div>
+    </div>
+  </div>
+
   <button class="confirmar" onclick="guardarCompra()">Confirmar compra</button>
 
   <div class="resumen">
@@ -365,6 +458,32 @@
     const totalSpan = document.getElementById('total');
     const resumenPre = document.getElementById('resumen');
     const historialPre = document.getElementById('historial');
+    const montoPagadoInput = document.getElementById('montoPagado');
+    const cambioSpan = document.getElementById('cambio');
+    const apagarCambioSpan = document.getElementById('apagarCambio');
+    const pagoCambioSpan = document.getElementById('pagoCambio');
+
+    // Event listener para calcular cambio
+    montoPagadoInput.addEventListener('input', () => {
+      actualizarCambio();
+    });
+
+    function actualizarCambio() {
+      const totalPagar = parseFloat(totalSpan.textContent) || 0;
+      const montoPagado = parseFloat(montoPagadoInput.value) || 0;
+      const cambio = montoPagado - totalPagar;
+
+      apagarCambioSpan.textContent = totalPagar;
+      pagoCambioSpan.textContent = montoPagado;
+      cambioSpan.textContent = cambio >= 0 ? cambio : 0;
+
+      // Cambiar color si el cambio es negativo
+      if (cambio < 0) {
+        cambioSpan.parentElement.style.color = '#e74c3c';
+      } else {
+        cambioSpan.parentElement.style.color = '#27ae60';
+      }
+    }
 
     function crearProductoHTML(producto, index) {
       const div = document.createElement('div');
@@ -495,6 +614,7 @@
         if (cant) total += cant * productos[i].precio;
       });
       totalSpan.textContent = total;
+      actualizarCambio();
     }
 
     function guardarCompra() {
@@ -579,6 +699,7 @@
       document.getElementById('nombreEstudiante').value = '';
       document.getElementById('cursoEspanol').value = '';
       document.getElementById('cursoIngles').value = '';
+      document.getElementById('montoPagado').value = '';
     }
 
     function actualizarHistorial() {
